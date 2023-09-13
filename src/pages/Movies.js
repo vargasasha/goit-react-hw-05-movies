@@ -1,22 +1,25 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-
 import axios from 'axios';
 
-const Home = () => {
-  const [trending, setTrending] = useState([]);
+const Movies = () => {
+  const [query, setQuery] = useState('');
+  const [movies, setMovies] = useState([]);
 
-  useEffect(() => {
-    async function getTrending() {
+    useEffect(() => {
+        if (query === "") return;
+
+    async function getMovies() {
       try {
         async function fetch() {
           axios.defaults.baseURL = 'https://api.themoviedb.org/3/';
-          const endPoint = 'trending/movie/day';
+          const endPoint = 'search/movie';
 
           const options = {
             params: {
               api_key: '5186e2fae974004c70b9283e5f607f3e',
               language: 'en-US',
+              query: query,
             },
           };
 
@@ -28,20 +31,30 @@ const Home = () => {
           return response.data.results;
         }
 
-        setTrending(await fetch());
+        setMovies(await fetch());
       } catch (error) {
         console.log(error);
       } finally {
       }
     }
-    getTrending();
-  }, []);
+    getMovies();
+  }, [query]);
 
   return (
     <main>
-      <h2>Trending today</h2>
+      <h2>КІНОШКИ</h2>
+      <form
+        onSubmit={evt => {
+          evt.preventDefault();
+          setQuery(evt.target.elements.query.value);
+          evt.target.reset();
+        }}
+      >
+        <input type="text" autoComplete="off" autoFocus name="query"></input>
+        <button>Search</button>
+      </form>
       <ul>
-        {trending.map(movie => (
+        {movies.map(movie => (
           <li key={movie.id}>
             <Link to={`/movies/${movie.id}`}>{movie.title}</Link>{' '}
           </li>
@@ -51,4 +64,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Movies;
